@@ -1,0 +1,28 @@
+# --- Framework principal ---
+Flask==3.0.3
+
+# --- ORM e banco de dados ---
+SQLAlchemy==2.0.36
+Flask-SQLAlchemy==3.1.1
+
+# --- Migrações (equivalente ao Flyway/Liquibase do Java) ---
+Flask-Migrate==4.0.7
+alembic==1.14.0
+
+# --- Autenticação JWT ---
+Flask-JWT-Extended==4.6.0
+
+# --- CORS (para permitir o front acessar a API) ---
+Flask-Cors==4.0.0
+
+# --- Documentação Swagger ---
+Flasgger==0.9.7.1
+
+# --- Validação de e-mails e dados (opcional, mas útil) ---
+email-validator==2.2.0
+
+# --- Geração de PDFs para certificados (opcional) ---
+reportlab==4.2.5
+
+# --- Utilidades ---
+python-dotenv==1.0.1

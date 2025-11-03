@@ -12,6 +12,7 @@ class User(db.Model):
     telephone_number = db.Column(db.String(30), nullable=True)
     department = db.Column(db.String(200), nullable=True)
     adm = db.Column(db.Boolean(), default=False, nullable=False)
+    active = db.Column(db.Boolean(), default=True, nullable=False)
 
     @staticmethod
     def from_dict(data: dict) -> "User":

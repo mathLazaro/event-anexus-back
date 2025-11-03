@@ -10,13 +10,13 @@ def find_user_by_id(id: int) -> User:
     if not id:
         raise BadRequestException("O id do usuário é obrigatório.")
     user = User.query.get(id)
-    if not user:
+    if not user or not user.active:
         raise NotFoundException()
     return user
 
 
 def list_users() -> list[User]:
-    return User.query.all()
+    return User.query.filter_by(active=True).all()
 
 
 def create_user(user: User) -> int:
@@ -81,8 +81,10 @@ def patch_password(id: int, new_password: str) -> None:
 
 def delete_user(id: int) -> None:
     user = find_user_by_id(id)
-    db.session.delete(user)
+    user.active = False
+    db.session.merge(user)
     db.session.commit()
+    # TODO - Remover relacionamentos do usuário (Eventos, Convites, etc)
 
 
 def validate_user_types(user: User, is_sign_in: bool = False):

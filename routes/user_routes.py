@@ -1,5 +1,5 @@
 from flasgger import swag_from
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from models import User
 import services.user_service as service
 from exceptions import BadRequestException
@@ -39,7 +39,7 @@ def create_user():
     try:
         data = request.get_json(silent=True)
         if not data:
-            raise BadRequestException("Body must be a valid JSON")
+            raise BadRequestException("Body deve ser um JSON")
         id = service.create_user(User.from_dict(data))
 
         return response_created("user", id, "Usuario criado com sucesso")
@@ -56,9 +56,25 @@ def update_user(user_id):
             raise BadRequestException("O id do usuário é obrigatório.")
         data = request.get_json(silent=True)
         if not data:
-            raise BadRequestException("Body must be a valid JSON")
+            raise BadRequestException("Body deve ser um JSON")
         user = service.update_user(user_id, User.from_dict(data))
-        return
+        return jsonify(user.to_dict()), 200
+    except Exception as e:
+        print(e)
+        raise
+
+
+@user_bp.route("/<int:user_id>", methods=["PATCH"])
+@swag_from(swagger.patch_password)
+def patch_password(user_id):
+    try:
+        if not user_id:
+            raise BadRequestException("O id do usuário é obrigatório.")
+        data = request.get_json(silent=True)
+        if not data:
+            raise BadRequestException("Body deve ser um JSON")
+        service.patch_password(user_id, data.get("password"))
+        return "", 204
     except Exception as e:
         print(e)
         raise

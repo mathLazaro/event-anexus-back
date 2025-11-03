@@ -203,8 +203,6 @@ update_user = {
                 'type': 'object',
                 'properties': {
                     'name': {'type': 'string'},
-                    'email': {'type': 'string'},
-                    'password': {'type': 'string'},
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
                     'adm': {'type': 'boolean'}
@@ -236,6 +234,77 @@ update_user = {
                     'details': {
                         'type': 'array',
                         'items': {'type': 'string'}
+                    }
+                }
+            }
+        },
+        404: {
+            'description': 'Resource not found',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        500: {
+            'description': 'Internal server error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        }
+    }
+}
+
+patch_password = {
+    'tags': ['Usuários'],
+    'summary': 'Alterar senha do usuário',
+    'parameters': [
+        {
+            'name': 'user_id',
+            'in': 'path',
+            'type': 'integer',
+            'required': True,
+            'description': 'ID do usuário'
+        },
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'required': ['new_password'],
+                'properties': {
+                    'password': {
+                        'type': 'string',
+                        'minLength': 8,
+                        'description': 'Nova senha (mínimo 8 caracteres)'
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        204: {
+            'description': 'Senha alterada com sucesso'
+        },
+        400: {
+            'description': 'Bad request',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'},
+                    'details': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'password': {'type': 'string'}
+                            }
+                        }
                     }
                 }
             }

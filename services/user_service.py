@@ -20,7 +20,7 @@ def list_users() -> list[User]:
 
 
 def create_user(user: User) -> int:
-    validate_user_types(user)
+    validate_user_types(user, is_sign_in=True)
     validate_user(user, is_sign_in=True)
 
     user.encrypt_password()
@@ -45,6 +45,7 @@ def update_user(id: int, user: User) -> User:
 
     user.id = db_user.id
     user.password = db_user.password
+    user.email = db_user.email
 
     try:
         db.session.merge(user)
@@ -59,23 +60,43 @@ def update_user(id: int, user: User) -> User:
     return user
 
 
+def patch_password(id: int, new_password: str) -> None:
+    if not new_password or new_password.strip() == "":
+        raise BadRequestException("A nova senha do usuário é obrigatória.")
+    elif len(new_password) < 8:
+        raise BadRequestException(
+            details=[{"password": "A nova senha do usuário deve ter pelo menos 8 caracteres."}])
+
+    user = find_user_by_id(id)
+    user.password = new_password
+    user.encrypt_password()
+
+    try:
+        db.session.merge(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise
+
+
 def delete_user(id: int) -> None:
     user = find_user_by_id(id)
     db.session.delete(user)
     db.session.commit()
 
 
-def validate_user_types(user: User):
+def validate_user_types(user: User, is_sign_in: bool = False):
     errors = []
 
     if not isinstance(user.name, str):
         errors.append({"name": "O nome do usuário deve ser uma string."})
 
-    if not isinstance(user.email, str):
-        errors.append({"email": "O email do usuário deve ser uma string."})
+    if is_sign_in:
+        if not isinstance(user.email, str):
+            errors.append({"email": "O email do usuário deve ser uma string."})
 
-    if user.password is not None and not isinstance(user.password, str):
-        errors.append({"password": "A senha do usuário deve ser uma string."})
+        if user.password is not None and not isinstance(user.password, str):
+            errors.append({"password": "A senha do usuário deve ser uma string."})
 
     if user.telephone_number is not None and not isinstance(user.telephone_number, str):
         errors.append(
@@ -98,12 +119,11 @@ def validate_user(user: User, is_sign_in: bool = False) -> None:
     if user.name is None or user.name.strip() == "":
         errors.append({"name": "O nome do usuário é obrigatório."})
 
-    if user.email is None or user.email.strip() == "":
-        errors.append({"email": "O email do usuário é obrigatório."})
-    elif not re.match(EMAIL_PATTERN, user.email):
-        errors.append({"email": "O email do usuário é inválido."})
-
     if is_sign_in:
+        if user.email is None or user.email.strip() == "":
+            errors.append({"email": "O email do usuário é obrigatório."})
+        elif not re.match(EMAIL_PATTERN, user.email):
+            errors.append({"email": "O email do usuário é inválido."})
         if user.password is None or user.password.strip() == "":
             errors.append({"password": "A senha do usuário é obrigatória."})
         elif len(user.password) < 8:

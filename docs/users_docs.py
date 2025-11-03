@@ -1,6 +1,16 @@
 list_users = {
     "tags": ["Usuários"],
     "summary": "Listar usuários",
+    "security": [{"Bearer": []}],
+    "parameters": [
+        {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string",
+            "required": True,
+            "description": "Bearer token (formato: 'Bearer <token>')"
+        }
+    ],
     "responses": {
         200: {
             "description": "Lista de usuários",
@@ -17,6 +27,15 @@ list_users = {
                         "adm": {"type": "boolean"}
                     }
                 },
+            }
+        },
+        401: {
+            "description": "Unauthorized - token inválido ou ausente",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string"}
+                }
             }
         },
         404: {
@@ -102,7 +121,15 @@ create_user = {
 get_user = {
     'tags': ['Usuários'],
     'summary': 'Obter usuário por ID',
+    'security': [{'Bearer': []}],
     'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token (formato: \'Bearer <token>\')'
+        },
         {
             'name': 'user_id',
             'in': 'path',
@@ -123,6 +150,15 @@ get_user = {
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
                     'adm': {'type': 'boolean'}
+                }
+            }
+        },
+        401: {
+            'description': 'Unauthorized - token inválido ou ausente',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
                 }
             }
         },
@@ -150,7 +186,15 @@ get_user = {
 delete_user = {
     'tags': ['Usuários'],
     'summary': 'Deletar usuário por ID',
+    'security': [{'Bearer': []}],
     'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token (formato: \'Bearer <token>\')'
+        },
         {
             'name': 'user_id',
             'in': 'path',
@@ -162,6 +206,15 @@ delete_user = {
     'responses': {
         204: {
             'description': 'Usuário deletado com sucesso'
+        },
+        401: {
+            'description': 'Unauthorized - token inválido ou ausente',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
         },
         404: {
             'description': 'Resource not found',
@@ -187,7 +240,15 @@ delete_user = {
 update_user = {
     'tags': ['Usuários'],
     'summary': 'Atualizar usuário por ID',
+    'security': [{'Bearer': []}],
     'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token (formato: \'Bearer <token>\')'
+        },
         {
             'name': 'user_id',
             'in': 'path',
@@ -238,6 +299,15 @@ update_user = {
                 }
             }
         },
+        401: {
+            'description': 'Unauthorized - token inválido ou ausente',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
         404: {
             'description': 'Resource not found',
             'schema': {
@@ -262,7 +332,15 @@ update_user = {
 patch_password = {
     'tags': ['Usuários'],
     'summary': 'Alterar senha do usuário',
+    'security': [{'Bearer': []}],
     'parameters': [
+        {
+            'name': 'Authorization',
+            'in': 'header',
+            'type': 'string',
+            'required': True,
+            'description': 'Bearer token (formato: \'Bearer <token>\')'
+        },
         {
             'name': 'user_id',
             'in': 'path',
@@ -306,6 +384,15 @@ patch_password = {
                             }
                         }
                     }
+                }
+            }
+        },
+        401: {
+            'description': 'Unauthorized - token inválido ou ausente',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
                 }
             }
         },

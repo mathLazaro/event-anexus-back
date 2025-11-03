@@ -1,5 +1,6 @@
 from flasgger import swag_from
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from models import User
 import services.user_service as service
 from exceptions import BadRequestException
@@ -12,6 +13,7 @@ user_bp = Blueprint("user_bp", __name__, url_prefix="/users")
 
 @user_bp.route("/", methods=["GET"])
 @swag_from(swagger.list_users)
+@jwt_required()
 def list_users():
     try:
         users = service.list_users()
@@ -22,6 +24,7 @@ def list_users():
 
 @user_bp.route("/<int:user_id>", methods=["GET"])
 @swag_from(swagger.get_user)
+@jwt_required()
 def get_user(user_id):
     try:
         if not user_id:
@@ -50,6 +53,7 @@ def create_user():
 
 @user_bp.route("/<int:user_id>", methods=["PUT"])
 @swag_from(swagger.update_user)
+@jwt_required()
 def update_user(user_id):
     try:
         if not user_id:
@@ -66,6 +70,7 @@ def update_user(user_id):
 
 @user_bp.route("/<int:user_id>", methods=["PATCH"])
 @swag_from(swagger.patch_password)
+@jwt_required()
 def patch_password(user_id):
     try:
         if not user_id:
@@ -82,6 +87,7 @@ def patch_password(user_id):
 
 @user_bp.route("/<int:user_id>", methods=["DELETE"])
 @swag_from(swagger.delete_user)
+@jwt_required()
 def delete_user(user_id):
     try:
         if not user_id:

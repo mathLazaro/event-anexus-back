@@ -1,5 +1,6 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token
 
 
 class User(db.Model):
@@ -37,3 +38,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    def generate_auth_token(self):
+        return create_access_token(identity=str(self.id))

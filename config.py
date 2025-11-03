@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "instance" / "meubanco.db"
+DB_PATH = BASE_DIR / "instance" / "database.db"
+
 
 class Config:
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"

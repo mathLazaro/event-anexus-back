@@ -2,6 +2,8 @@ from exceptions import BadRequestException, NotFoundException
 from models import User
 from app import db
 import re
+from sqlalchemy.exc import IntegrityError
+from utils import parse_integrity_error
 
 
 def find_user_by_id(id: int) -> User:
@@ -23,8 +25,16 @@ def create_user(user: User) -> int:
 
     user.encrypt_password()
 
-    db.session.add(user)
-    db.session.commit()
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        raise BadRequestException(details=[parse_integrity_error(e)])
+    except Exception as e:
+        db.session.rollback()
+        raise
+
     return user.id
 
 
@@ -36,8 +46,16 @@ def update_user(id: int, user: User) -> User:
     user.id = db_user.id
     user.password = db_user.password
 
-    db.session.merge(user)
-    db.session.commit()
+    try:
+        db.session.merge(user)
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        raise BadRequestException(details=[parse_integrity_error(e)])
+    except Exception as e:
+        db.session.rollback()
+        raise
+
     return user
 
 

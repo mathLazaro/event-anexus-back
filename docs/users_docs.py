@@ -294,9 +294,13 @@ patch_password = {
             'required': True,
             'schema': {
                 'type': 'object',
-                'required': ['new_password'],
+                'required': ['current_password', 'new_password'],
                 'properties': {
-                    'password': {
+                    'current_password': {
+                        'type': 'string',
+                        'description': 'Senha atual do usuário'
+                    },
+                    'new_password': {
                         'type': 'string',
                         'minLength': 8,
                         'description': 'Nova senha (mínimo 8 caracteres)'

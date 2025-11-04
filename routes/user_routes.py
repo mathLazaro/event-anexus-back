@@ -74,7 +74,9 @@ def patch_password():
         data = request.get_json(silent=True)
         if not data:
             raise BadRequestException("Body deve ser um JSON")
-        service.patch_password(data.get("password"))
+        current_password = data.get("current_password")
+        new_password = data.get("new_password")
+        service.patch_password(current_password, new_password)
         return "", 204
     except Exception as e:
         print(e)

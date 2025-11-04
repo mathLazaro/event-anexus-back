@@ -1,4 +1,5 @@
 from exceptions import BadRequestException, NotFoundException
+from exceptions.business_exceptions import UnauthorizedException
 from models import User, UserType
 from app import db
 from flask_jwt_extended import current_user
@@ -147,14 +148,19 @@ def update_user(user: User) -> User:
     return user
 
 
-def patch_password(new_password: str) -> None:
+def patch_password(current_password: str, new_password: str) -> None:
+    if not current_password or current_password.strip() == "":
+        raise BadRequestException("A senha atual do usuário é obrigatória.")
     if not new_password or new_password.strip() == "":
         raise BadRequestException("A nova senha do usuário é obrigatória.")
     elif len(new_password) < 8:
         raise BadRequestException(
             details=[{"password": "A nova senha do usuário deve ter pelo menos 8 caracteres."}])
 
-    user = current_user
+    user: User = current_user
+    if not user.check_password(current_password):
+        raise UnauthorizedException("Senha atual incorreta.")
+
     user.password = new_password
     user.encrypt_password()
 

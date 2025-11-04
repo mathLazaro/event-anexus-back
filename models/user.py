@@ -34,7 +34,7 @@ class User(db.Model):
             "email": self.email,
             "telephone_number": self.telephone_number,
             "department": self.department,
-            "type": self.type.name,
+            "type": self.type.name if self.type else None,
         }
 
     def encrypt_password(self):

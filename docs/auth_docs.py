@@ -29,7 +29,18 @@ login = {
                 'type': 'object',
                 'properties': {
                     'message': {'type': 'string'},
-                    'token': {'type': 'string', 'description': 'JWT token'}
+                    'token': {'type': 'string', 'description': 'JWT token'},
+                    'user': {
+                        'type': 'object',
+                        'properties': {
+                            'id': {'type': 'integer'},
+                            'name': {'type': 'string'},
+                            'email': {'type': 'string'},
+                            'telephone_number': {'type': 'string'},
+                            'department': {'type': 'string'},
+                            'type': {'type': 'string', 'enum': ['ORGANIZER', 'REGULAR'], 'description': 'Tipo do usuário'}
+                        }
+                    }
                 }
             }
         },

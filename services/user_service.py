@@ -16,6 +16,15 @@ def find_user_by_id(id: int) -> User:
     return user
 
 
+def find_user_by_email(email: str) -> User:
+    if not email or email.strip() == "":
+        raise BadRequestException("O email do usuário é obrigatório.")
+    user = User.query.filter_by(email=email, active=True).first()
+    if not user or not user.active:
+        raise NotFoundException()
+    return user
+
+
 def list_users() -> list[User]:
     return User.query.filter_by(active=True).all()
 

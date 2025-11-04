@@ -24,7 +24,7 @@ list_users = {
                         "email": {"type": "string"},
                         "telephone_number": {"type": "string"},
                         "department": {"type": "string"},
-                        "adm": {"type": "boolean"}
+                        "type": {"type": "string", "enum": ["ORGANIZER", "REGULAR"], "description": "Tipo do usuário"}
                     }
                 },
             }
@@ -76,7 +76,7 @@ create_user = {
                     'password': {'type': 'string'},
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
-                    'adm': {'type': 'boolean'}
+                    'type': {'type': 'string', 'enum': ['ORGANIZER', 'REGULAR'], 'description': 'Tipo do usuário'}
                 }
             }
         }
@@ -149,7 +149,7 @@ get_user = {
                     'email': {'type': 'string'},
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
-                    'adm': {'type': 'boolean'}
+                    'type': {'type': 'string', 'enum': ['ORGANIZER', 'REGULAR'], 'description': 'Tipo do usuário'}
                 }
             }
         },
@@ -266,7 +266,7 @@ update_user = {
                     'name': {'type': 'string'},
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
-                    'adm': {'type': 'boolean'}
+                    'type': {'type': 'string', 'enum': ['ORGANIZER', 'REGULAR'], 'description': 'Tipo do usuário'}
                 }
             }
         }
@@ -282,7 +282,7 @@ update_user = {
                     'email': {'type': 'string'},
                     'telephone_number': {'type': 'string'},
                     'department': {'type': 'string'},
-                    'adm': {'type': 'boolean'}
+                    'type': {'type': 'string', 'enum': ['ORGANIZER', 'REGULAR'], 'description': 'Tipo do usuário'}
                 }
             }
         },

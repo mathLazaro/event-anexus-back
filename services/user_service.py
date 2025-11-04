@@ -1,5 +1,5 @@
 from exceptions import BadRequestException, NotFoundException
-from models import User
+from models import User, UserType
 from app import db
 import re
 from sqlalchemy.exc import IntegrityError
@@ -46,6 +46,7 @@ def update_user(id: int, user: User) -> User:
     user.id = db_user.id
     user.password = db_user.password
     user.email = db_user.email
+    user.type = db_user.type
 
     try:
         db.session.merge(user)
@@ -107,8 +108,8 @@ def validate_user_types(user: User, is_sign_in: bool = False):
     if user.department is not None and not isinstance(user.department, str):
         errors.append({"department": "O departamento do usuário deve ser uma string."})
 
-    if user.adm is not None and not isinstance(user.adm, bool):
-        errors.append({"adm": "O campo adm do usuário deve ser um booleano."})
+    if user.type is not None and not isinstance(user.type, UserType):
+        errors.append({"type": "O tipo do usuário é inválido."})
 
     if errors:
         raise BadRequestException("Erro de validação de tipo", errors)
@@ -131,6 +132,9 @@ def validate_user(user: User, is_sign_in: bool = False) -> None:
         elif len(user.password) < 8:
             errors.append(
                 {"password": "A senha do usuário deve ter pelo menos 8 caracteres."})
+
+    if user.type is None:
+        errors.append({"type": "O tipo do usuário é obrigatório."})
 
     if errors:
         raise BadRequestException("Erro de validação", errors)

@@ -2,6 +2,8 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 
+from models.user_type import UserType
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -12,15 +14,17 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     telephone_number = db.Column(db.String(30), nullable=True)
     department = db.Column(db.String(200), nullable=True)
-    adm = db.Column(db.Boolean(), default=False, nullable=False)
+    type = db.Column(db.Enum(UserType), nullable=False, default=UserType.REGULAR)
     active = db.Column(db.Boolean(), default=True, nullable=False)
 
     @staticmethod
     def from_dict(data: dict) -> "User":
         user = User()
-        for field in ['id', 'name', 'email', 'password', 'telephone_number', 'department', 'adm']:
+        for field in ['id', 'name', 'email', 'password', 'telephone_number', 'department']:
             if field in data:
                 setattr(user, field, data[field])
+        if 'type' in data:
+            user.type = UserType(data['type'])
         return user
 
     def to_dict(self):
@@ -30,7 +34,7 @@ class User(db.Model):
             "email": self.email,
             "telephone_number": self.telephone_number,
             "department": self.department,
-            "adm": self.adm,
+            "type": self.type.name,
         }
 
     def encrypt_password(self):

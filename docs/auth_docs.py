@@ -74,6 +74,73 @@ login = {
     }
 }
 
+verify_reset_token = {
+    'tags': ['Autenticação'],
+    'summary': 'Verificar token e redefinir senha',
+    'description': 'Valida o código de verificação recebido por email e define a nova senha',
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'required': ['token', 'new_password'],
+                'properties': {
+                    'token': {
+                        'type': 'string',
+                        'description': 'Código de verificação recebido por email (6 dígitos)',
+                        'minLength': 6,
+                        'maxLength': 6
+                    },
+                    'new_password': {
+                        'type': 'string',
+                        'description': 'Nova senha (mínimo 8 caracteres)',
+                        'minLength': 8
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Senha redefinida com sucesso',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'message': {'type': 'string', 'example': 'Token de redefinição de senha verificado com sucesso.'}
+                }
+            }
+        },
+        400: {
+            'description': 'Bad request - token inválido, expirado ou dados incompletos',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        404: {
+            'description': 'Usuário não encontrado',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        500: {
+            'description': 'Internal server error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        }
+    }
+}
 reset_password = {
     'tags': ['Autenticação'],
     'summary': 'Solicitar redefinição de senha',

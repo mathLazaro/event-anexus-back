@@ -27,6 +27,16 @@ def find_user_by_email(email: str) -> User:
     return user
 
 
+def find_user_by_reset_token(token: str) -> User:
+    if not token or token.strip() == "":
+        raise BadRequestException("O token de redefinição de senha é obrigatório.")
+    user = User.query.filter_by(
+        password_reset_token=token, active=True).first()
+    if not user or not user.active:
+        raise NotFoundException()
+    return user
+
+
 def generate_user_reset_token(email: str) -> str:
     user = find_user_by_email(email)
 
@@ -43,6 +53,52 @@ def generate_user_reset_token(email: str) -> str:
         db.session.rollback()
         raise
     return token
+
+
+def verify_reset_token(token: str) -> bool:
+    user = find_user_by_reset_token(token)
+
+    token_is_valid = str(user.password_reset_token).lower() == token.lower()
+    token_is_not_expired = user.password_reset_expires_at and datetime.now(
+    ) < user.password_reset_expires_at
+
+    if not token_is_not_expired:
+        user.password_reset_token = None
+        user.password_reset_expires_at = None
+        try:
+            db.session.merge(user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise
+
+    return user if token_is_valid and token_is_not_expired else None
+
+
+def change_user_password(token: str, new_password: str) -> None:
+    user = verify_reset_token(token)
+
+    if not user:
+        raise BadRequestException("Token inválido ou expirado.")
+
+    if not new_password or new_password.strip() == "":
+        raise BadRequestException("A nova senha do usuário é obrigatória.")
+    elif len(new_password) < 8:
+        raise BadRequestException(
+            details=[{"password": "A nova senha do usuário deve ter pelo menos 8 caracteres."}])
+
+    user.password = new_password
+    user.encrypt_password()
+
+    user.password_reset_token = None
+    user.password_reset_expires_at = None
+
+    try:
+        db.session.merge(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise
 
 
 def list_users() -> list[User]:

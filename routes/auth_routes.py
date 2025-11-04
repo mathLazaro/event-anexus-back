@@ -39,3 +39,19 @@ def reset_password():
     except Exception as e:
         print(e)
         raise
+
+
+@auth_bp.route("/verify-reset-password", methods=["POST"])
+@swag_from(swagger.verify_reset_token)
+def verify_reset_token():
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            raise BadRequestException("Body deve ser um JSON")
+        token = data.get("token")
+        new_password = data.get("new_password")
+        service.verify_reset_token(token, new_password)
+        return jsonify({"message": "Token de redefinição de senha verificado com sucesso."}), 200
+    except Exception as e:
+        print(e)
+        raise

@@ -20,3 +20,10 @@ def reset_password(email: str):
 
     token = user_service.generate_user_reset_token(email)
     email_service.send_password_reset_email(email, token)
+
+
+def verify_reset_token(token: str, new_password: str):
+    if not token or not new_password:
+        raise BadRequestException("Token e nova senha são obrigatórios.")
+
+    user_service.change_user_password(token, new_password)

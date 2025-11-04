@@ -2,15 +2,6 @@ list_users = {
     "tags": ["Usuários"],
     "summary": "Listar usuários",
     "security": [{"Bearer": []}],
-    "parameters": [
-        {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string",
-            "required": True,
-            "description": "Bearer token (formato: 'Bearer <token>')"
-        }
-    ],
     "responses": {
         200: {
             "description": "Lista de usuários",
@@ -120,16 +111,9 @@ create_user = {
 
 get_user = {
     'tags': ['Usuários'],
-    'summary': 'Obter usuário por ID',
+    'summary': 'Obter usuário',
     'security': [{'Bearer': []}],
     'parameters': [
-        {
-            'name': 'Authorization',
-            'in': 'header',
-            'type': 'string',
-            'required': True,
-            'description': 'Bearer token (formato: \'Bearer <token>\')'
-        },
         {
             'name': 'user_id',
             'in': 'path',
@@ -185,24 +169,8 @@ get_user = {
 
 delete_user = {
     'tags': ['Usuários'],
-    'summary': 'Deletar usuário por ID',
+    'summary': 'Deletar usuário',
     'security': [{'Bearer': []}],
-    'parameters': [
-        {
-            'name': 'Authorization',
-            'in': 'header',
-            'type': 'string',
-            'required': True,
-            'description': 'Bearer token (formato: \'Bearer <token>\')'
-        },
-        {
-            'name': 'user_id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True,
-            'description': 'ID do usuário'
-        }
-    ],
     'responses': {
         204: {
             'description': 'Usuário deletado com sucesso'
@@ -239,23 +207,9 @@ delete_user = {
 
 update_user = {
     'tags': ['Usuários'],
-    'summary': 'Atualizar usuário por ID',
+    'summary': 'Atualizar usuário',
     'security': [{'Bearer': []}],
     'parameters': [
-        {
-            'name': 'Authorization',
-            'in': 'header',
-            'type': 'string',
-            'required': True,
-            'description': 'Bearer token (formato: \'Bearer <token>\')'
-        },
-        {
-            'name': 'user_id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True,
-            'description': 'ID do usuário'
-        },
         {
             'name': 'body',
             'in': 'body',
@@ -334,20 +288,6 @@ patch_password = {
     'summary': 'Alterar senha do usuário',
     'security': [{'Bearer': []}],
     'parameters': [
-        {
-            'name': 'Authorization',
-            'in': 'header',
-            'type': 'string',
-            'required': True,
-            'description': 'Bearer token (formato: \'Bearer <token>\')'
-        },
-        {
-            'name': 'user_id',
-            'in': 'path',
-            'type': 'integer',
-            'required': True,
-            'description': 'ID do usuário'
-        },
         {
             'name': 'body',
             'in': 'body',

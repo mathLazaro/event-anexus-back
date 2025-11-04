@@ -1,6 +1,6 @@
 from flasgger import swag_from
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User
 import services.user_service as service
 from exceptions import BadRequestException
@@ -51,49 +51,45 @@ def create_user():
         raise
 
 
-@user_bp.route("/<int:user_id>", methods=["PUT"])
+@user_bp.route("/", methods=["PUT"])
 @swag_from(swagger.update_user)
 @jwt_required()
-def update_user(user_id):
+def update_user():
     try:
-        if not user_id:
-            raise BadRequestException("O id do usuário é obrigatório.")
         data = request.get_json(silent=True)
         if not data:
             raise BadRequestException("Body deve ser um JSON")
-        user = service.update_user(user_id, User.from_dict(data))
+        user = service.update_user(User.from_dict(data))
         return jsonify(user.to_dict()), 200
     except Exception as e:
         print(e)
         raise
 
 
-@user_bp.route("/<int:user_id>", methods=["PATCH"])
+@user_bp.route("/", methods=["PATCH"])
 @swag_from(swagger.patch_password)
 @jwt_required()
-def patch_password(user_id):
+def patch_password():
     try:
-        if not user_id:
-            raise BadRequestException("O id do usuário é obrigatório.")
         data = request.get_json(silent=True)
         if not data:
             raise BadRequestException("Body deve ser um JSON")
-        service.patch_password(user_id, data.get("password"))
+        service.patch_password(data.get("password"))
         return "", 204
     except Exception as e:
         print(e)
         raise
 
 
-@user_bp.route("/<int:user_id>", methods=["DELETE"])
+@user_bp.route("/", methods=["DELETE"])
 @swag_from(swagger.delete_user)
 @jwt_required()
-def delete_user(user_id):
+def delete_user():
     try:
-        if not user_id:
-            raise BadRequestException("O id do usuário é obrigatório.")
-        service.delete_user(user_id)
+        service.delete_user()
         return "", 204
     except Exception as e:
         print(e)
         raise
+
+# TODO modificar rotas para usar o current_user do JWT

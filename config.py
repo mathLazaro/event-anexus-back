@@ -10,3 +10,25 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY", "chave-super-secreta")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-chave-secreta")
+
+    # Configuração do Swagger
+    SWAGGER = {
+        'title': 'Event Anexus API',
+        'uiversion': 3,
+        'version': '1.0.0',
+        'description': 'API para gerenciamento de eventos',
+        'template_folder': 'templates/flasgger',
+        'securityDefinitions': {
+            'Bearer': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header',
+                'description': 'Digite apenas o token JWT (sem o prefixo "Bearer")'
+            }
+        },
+        'security': [
+            {
+                'Bearer': []
+            }
+        ]
+    }

@@ -1,6 +1,7 @@
 from exceptions import BadRequestException, NotFoundException
 from models import User, UserType
 from app import db
+from flask_jwt_extended import current_user
 import re
 from sqlalchemy.exc import IntegrityError
 from utils import parse_integrity_error
@@ -38,8 +39,8 @@ def create_user(user: User) -> int:
     return user.id
 
 
-def update_user(id: int, user: User) -> User:
-    db_user = find_user_by_id(id)
+def update_user(user: User) -> User:
+    db_user = current_user
     validate_user_types(user)
     validate_user(user)
 
@@ -61,14 +62,14 @@ def update_user(id: int, user: User) -> User:
     return user
 
 
-def patch_password(id: int, new_password: str) -> None:
+def patch_password(new_password: str) -> None:
     if not new_password or new_password.strip() == "":
         raise BadRequestException("A nova senha do usuário é obrigatória.")
     elif len(new_password) < 8:
         raise BadRequestException(
             details=[{"password": "A nova senha do usuário deve ter pelo menos 8 caracteres."}])
 
-    user = find_user_by_id(id)
+    user = current_user
     user.password = new_password
     user.encrypt_password()
 
@@ -80,8 +81,8 @@ def patch_password(id: int, new_password: str) -> None:
         raise
 
 
-def delete_user(id: int) -> None:
-    user = find_user_by_id(id)
+def delete_user() -> None:
+    user = current_user
     user.active = False
     db.session.merge(user)
     db.session.commit()

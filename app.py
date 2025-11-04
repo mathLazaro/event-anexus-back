@@ -1,7 +1,7 @@
 from flasgger import Swagger
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, current_user
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -50,6 +50,11 @@ def create_app():
     @app.errorhandler(Exception)
     def generic_error(error: Exception):
         return {"error": "Internal Server Error"}, 500
+
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data) -> models.User:
+        identity = jwt_data["sub"]
+        return models.User.query.get(int(identity))
 
     return app
 

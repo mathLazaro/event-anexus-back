@@ -24,3 +24,18 @@ def login():
     except Exception as e:
         print(e)
         raise
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+@swag_from(swagger.reset_password)
+def reset_password():
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            raise BadRequestException("Body deve ser um JSON")
+        email = data.get("email")
+        service.reset_password(email)
+        return jsonify({"message": "Instruções para redefinição de senha enviadas para o email."}), 200
+    except Exception as e:
+        print(e)
+        raise

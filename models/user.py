@@ -15,6 +15,8 @@ class User(db.Model):
     telephone_number = db.Column(db.String(30), nullable=True)
     department = db.Column(db.String(200), nullable=True)
     type = db.Column(db.Enum(UserType), nullable=False, default=UserType.REGULAR)
+    password_reset_token = db.Column(db.String(6), unique=True, nullable=True)
+    password_reset_expires_at = db.Column(db.DateTime, nullable=True)
     active = db.Column(db.Boolean(), default=True, nullable=False)
 
     @staticmethod

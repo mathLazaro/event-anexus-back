@@ -73,3 +73,64 @@ login = {
         }
     }
 }
+
+reset_password = {
+    'tags': ['Autenticação'],
+    'summary': 'Solicitar redefinição de senha',
+    'description': 'Envia um código de verificação para o email do usuário para redefinir a senha',
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'required': ['email'],
+                'properties': {
+                    'email': {
+                        'type': 'string',
+                        'description': 'Email do usuário cadastrado'
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Email de redefinição enviado com sucesso',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'message': {'type': 'string', 'example': 'Instruções para redefinição de senha enviadas para o email.'}
+                }
+            }
+        },
+        400: {
+            'description': 'Bad request - email inválido ou não fornecido',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        404: {
+            'description': 'Usuário não encontrado',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        500: {
+            'description': 'Internal server error',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        }
+    }
+}

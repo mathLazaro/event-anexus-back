@@ -1,16 +1,29 @@
+from exceptions import *
+from config import Config
 from flasgger import Swagger
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, current_user
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from sqlalchemy import MetaData
 
-from config import Config
-from exceptions import *
+naming_convention = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(column_0_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
 
-db = SQLAlchemy()
+metadata = MetaData(naming_convention=naming_convention)
+
+
+db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
 jwt = JWTManager()
+mail = Mail()
 
 
 def create_app():
@@ -21,6 +34,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    mail.init_app(app)
     CORS(app)
     Swagger(app)
 

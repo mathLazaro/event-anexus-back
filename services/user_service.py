@@ -5,6 +5,8 @@ from flask_jwt_extended import current_user
 import re
 from sqlalchemy.exc import IntegrityError
 from utils import parse_integrity_error
+import secrets
+from datetime import datetime, timedelta
 
 
 def find_user_by_id(id: int) -> User:
@@ -23,6 +25,24 @@ def find_user_by_email(email: str) -> User:
     if not user or not user.active:
         raise NotFoundException()
     return user
+
+
+def generate_user_reset_token(email: str) -> str:
+    user = find_user_by_email(email)
+
+    token_expires_at = datetime.now() + timedelta(minutes=5)
+    token = secrets.token_hex(6)[:6]
+
+    user.password_reset_token = token
+    user.password_reset_expires_at = token_expires_at
+
+    try:
+        db.session.merge(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise
+    return token
 
 
 def list_users() -> list[User]:

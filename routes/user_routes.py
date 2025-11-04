@@ -91,5 +91,3 @@ def delete_user():
     except Exception as e:
         print(e)
         raise
-
-# TODO modificar rotas para usar o current_user do JWT

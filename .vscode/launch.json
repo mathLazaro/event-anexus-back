@@ -13,7 +13,8 @@
             },
             "args": ["run"],
             "jinja": true,
-            "justMyCode": true
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

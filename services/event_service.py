@@ -12,7 +12,7 @@ def list_events(user) -> list[Event]:
 
 
 def get_by_id(event_id) -> Event:
-    event = Event.query.get(event_id, active=True)
+    event = Event.query.filter_by(id=event_id, active=True).first()
     if not event:
         raise NotFoundException()
     return event
@@ -38,7 +38,7 @@ def create(event: Event) -> int:
 
 def update(event_id, event: Event, user_id: int) -> int:
 
-    db_event = Event.query.get(event_id, active=True)
+    db_event = Event.query.filter_by(id=event_id, active=True).first()
     if not db_event:
         raise NotFoundException()
 
@@ -67,7 +67,7 @@ def update(event_id, event: Event, user_id: int) -> int:
 
 
 def delete(event_id: int, user_id: int) -> None:
-    event = Event.query.get(event_id, active=True)
+    event = Event.query.filter_by(id=event_id, active=True).first()
     if not event:
         raise NotFoundException()
 

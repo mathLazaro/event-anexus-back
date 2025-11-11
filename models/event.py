@@ -1,5 +1,6 @@
 from app import db
 from models.event_type import EventType
+from models.event_participant import event_participants
 from sqlalchemy import Enum as SqlEnum
 from datetime import datetime
 from exceptions.business_exceptions import BadRequestException
@@ -19,7 +20,17 @@ class Event(db.Model):
     speaker = db.Column(db.String(100), nullable=True)
     institution_organizer = db.Column(db.String(200), nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    creator = db.relationship('User', backref=db.backref('events', lazy=True))
+
+    creator = db.relationship('User', foreign_keys=[
+                              created_by], backref=db.backref('created_events', lazy=True))
+
+    participants = db.relationship(
+        'User',
+        secondary=event_participants,
+        backref=db.backref('enrolled_events', lazy='dynamic'),
+        lazy='dynamic'
+    )
+
     active = db.Column(db.Boolean(), default=True, nullable=False)
 
     @staticmethod

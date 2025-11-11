@@ -83,6 +83,18 @@ def delete(event_id: int, user_id: int) -> None:
         raise
 
 
+def deleteAllByUser(user_id: int) -> None:
+    events = Event.query.filter_by(created_by=user_id, active=True).all()
+    for event in events:
+        event.active = False
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise
+
+
 def validate_event_types(event: Event) -> None:
     errors = []
 

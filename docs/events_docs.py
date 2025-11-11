@@ -482,7 +482,8 @@ list_available_events = {
                         "speaker": {"type": "string"},
                         "institution_organizer": {"type": "string"},
                         "created_by": {"type": "integer"},
-                        "remaining_slots": {"type": "integer", "description": "Vagas restantes (null se sem limite)"}
+                        "remaining_slots": {"type": "integer", "description": "Vagas restantes (null se sem limite)"},
+                        "is_participant": {"type": "boolean", "description": "Indica se o usuário autenticado está inscrito no evento"}
                     }
                 }
             }
@@ -542,7 +543,8 @@ get_public_event = {
                     "enrolled_count": {"type": "integer", "description": "Número de participantes inscritos"},
                     "remaining_slots": {"type": "integer", "description": "Vagas restantes (null se sem limite)"},
                     "is_full": {"type": "boolean", "description": "Indica se o evento está lotado"},
-                    "is_past": {"type": "boolean", "description": "Indica se o evento já passou"}
+                    "is_past": {"type": "boolean", "description": "Indica se o evento já passou"},
+                    "is_participant": {"type": "boolean", "description": "Indica se o usuário autenticado está inscrito no evento"}
                 }
             }
         },

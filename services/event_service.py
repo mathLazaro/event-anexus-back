@@ -1,3 +1,4 @@
+from flask_jwt_extended import current_user
 from models import Event, EventType, User, event_participants
 from app import db
 from exceptions import BadRequestException, NotFoundException
@@ -30,8 +31,16 @@ def list_available_events() -> list[dict]:
         if event.capacity:
             remaining_slots = event.capacity - enrolled_count
 
+        # Verifica se o usuário está inscrito no evento
+        is_participant = db.session.query(event_participants).filter_by(
+            event_id=event.id,
+            user_id=current_user.id,
+            active=True
+        ).first() is not None
+
         event_dict = event.to_dict()
         event_dict['remaining_slots'] = remaining_slots
+        event_dict['is_participant'] = is_participant
 
         result.append(event_dict)
 
@@ -47,6 +56,7 @@ def get_by_id(event_id) -> Event:
 
 def get_public_event_details(event_id: int) -> dict:
     event = get_by_id(event_id)
+    user: User = current_user
 
     enrolled_count = db.session.query(event_participants).filter_by(
         event_id=event_id,
@@ -65,6 +75,11 @@ def get_public_event_details(event_id: int) -> dict:
     event_dict['remaining_slots'] = remaining_slots
     event_dict['is_full'] = is_full
     event_dict['is_past'] = event.date < datetime.now()
+    event_dict['is_participant'] = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=True
+    ).first() is not None
 
     return event_dict
 
@@ -153,15 +168,21 @@ def enroll_user(event_id: int, user: User) -> None:
         raise BadRequestException(
             details=[{"event": "Não é possível se inscrever em eventos passados."}])
 
-    existing = db.session.query(event_participants).filter_by(
+    existing_active = db.session.query(event_participants).filter_by(
         event_id=event_id,
         user_id=user.id,
         active=True
     ).first()
 
-    if existing:
+    if existing_active:
         raise BadRequestException(
             details=[{"enrollment": "Você já está inscrito neste evento."}])
+
+    existing_inactive = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=False
+    ).first()
 
     if event.capacity:
         enrolled_count = db.session.query(event_participants).filter_by(
@@ -174,13 +195,24 @@ def enroll_user(event_id: int, user: User) -> None:
                 details=[{"event": "Este evento está lotado."}])
 
     try:
-        stmt = event_participants.insert().values(
-            user_id=user.id,
-            event_id=event_id,
-            registered_at=datetime.now(),
-            active=True
-        )
-        db.session.execute(stmt)
+        if existing_inactive:
+            stmt = event_participants.update().where(
+                (event_participants.c.event_id == event_id)
+                & (event_participants.c.user_id == user.id)
+            ).values(
+                active=True,
+                registered_at=datetime.now()
+            )
+            db.session.execute(stmt)
+        else:
+            stmt = event_participants.insert().values(
+                user_id=user.id,
+                event_id=event_id,
+                registered_at=datetime.now(),
+                active=True
+            )
+            db.session.execute(stmt)
+
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()

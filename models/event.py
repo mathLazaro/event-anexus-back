@@ -2,6 +2,7 @@ from app import db
 from models.event_type import EventType
 from sqlalchemy import Enum as SqlEnum
 from datetime import datetime
+from exceptions.business_exceptions import BadRequestException
 
 
 class Event(db.Model):
@@ -33,7 +34,14 @@ class Event(db.Model):
             if isinstance(data['type'], EventType):
                 event.type = data['type']
             else:
-                event.type = EventType(data['type'])
+                # Tenta por nome (WORKSHOP) ou por valor (Workshop)
+                try:
+                    event.type = EventType[data['type'].upper()]
+                except KeyError:
+                    event.type = EventType(data['type'])
+                except KeyError:
+                    raise BadRequestException(
+                        f"Tipo de evento inválido: {data['type']}")
 
         if 'date' in data:
             if isinstance(data['date'], datetime):

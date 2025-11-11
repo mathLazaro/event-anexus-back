@@ -2,12 +2,12 @@ from enum import Enum
 
 
 class EventType(Enum):
-    WORKSHOP = "Workshop"
-    LECTURE = "Lecture"
-    CONFERENCE = "Conference"
-    SEMINAR = "Seminar"
-    HACKATHON = "Hackathon"
-    MEETUP = "Meetup"
-    TRAINING = "Training"
-    WEBINAR = "Webinar"
-    OTHER = "Other"
+    WORKSHOP = "WORKSHOP"
+    LECTURE = "LECTURE"
+    CONFERENCE = "CONFERENCE"
+    SEMINAR = "SEMINAR"
+    HACKATHON = "HACKATHON"
+    MEETUP = "MEETUP"
+    TRAINING = "TRAINING"
+    WEBINAR = "WEBINAR"
+    OTHER = "OTHER"

@@ -69,7 +69,7 @@ def create_app():
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data) -> models.User:
         identity = jwt_data["sub"]
-        user = models.User.query.get(int(identity), active=True)
+        user = models.User.query.filter_by(id=int(identity), active=True).first()
         if not user:
             raise UnauthorizedException("Usuário inválido.")
         return user

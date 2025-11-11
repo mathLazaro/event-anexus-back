@@ -43,6 +43,7 @@ def create_app():
 
     app.register_blueprint(routes.user_bp)
     app.register_blueprint(routes.auth_bp)
+    app.register_blueprint(routes.event_bp)
 
     # Registrar handlers de erro
     @app.errorhandler(BadRequestException)

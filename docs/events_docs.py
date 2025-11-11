@@ -20,7 +20,7 @@ list_events = {
                         "capacity": {"type": "integer"},
                         "type": {
                             "type": "string",
-                            "enum": ["Workshop", "Lecture", "Conference", "Seminar", "Hackathon", "Meetup", "Training", "Webinar", "Other"],
+                            "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"],
                             "description": "Tipo do evento"
                         },
                         "speaker": {"type": "string"},
@@ -89,7 +89,7 @@ get_event = {
                     "capacity": {"type": "integer"},
                     "type": {
                         "type": "string",
-                        "enum": ["Workshop", "Lecture", "Conference", "Seminar", "Hackathon", "Meetup", "Training", "Webinar", "Other"],
+                        "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"],
                         "description": "Tipo do evento"
                     },
                     "speaker": {"type": "string"},
@@ -184,8 +184,8 @@ create_event = {
                     },
                     "type": {
                         "type": "string",
-                        "enum": ["Workshop", "Lecture", "Conference", "Seminar", "Hackathon", "Meetup", "Training", "Webinar", "Other"],
-                        "example": "Workshop"
+                        "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"],
+                        "example": "WORKSHOP"
                     },
                     "speaker": {
                         "type": "string",
@@ -312,8 +312,8 @@ update_event = {
                     },
                     "type": {
                         "type": "string",
-                        "enum": ["Workshop", "Lecture", "Conference", "Seminar", "Hackathon", "Meetup", "Training", "Webinar", "Other"],
-                        "example": "Workshop"
+                        "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"],
+                        "example": "WORKSHOP"
                     },
                     "speaker": {
                         "type": "string",
@@ -476,7 +476,7 @@ list_available_events = {
                         "capacity": {"type": "integer"},
                         "type": {
                             "type": "string",
-                            "enum": ["Workshop", "Lecture", "Conference", "Seminar", "Hackathon", "Meetup", "Training", "Webinar", "Other"],
+                            "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"],
                             "description": "Tipo do evento"
                         },
                         "speaker": {"type": "string"},

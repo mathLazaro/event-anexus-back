@@ -11,12 +11,31 @@ def list_events(user) -> list[Event]:
     return Event.query.filter_by(created_by=user.id, active=True).all()
 
 
-def list_available_events() -> list[Event]:
+def list_available_events() -> list[dict]:
+    """RFS08 - Lista eventos futuros com inscrições abertas"""
     now = datetime.now()
-    return Event.query.filter(
+    events = Event.query.filter(
         Event.active == True,
         Event.date >= now
     ).order_by(Event.date.asc()).all()
+
+    result = []
+    for event in events:
+        enrolled_count = db.session.query(event_participants).filter_by(
+            event_id=event.id,
+            active=True
+        ).count()
+
+        remaining_slots = None
+        if event.capacity:
+            remaining_slots = event.capacity - enrolled_count
+
+        event_dict = event.to_dict()
+        event_dict['remaining_slots'] = remaining_slots
+
+        result.append(event_dict)
+
+    return result
 
 
 def get_by_id(event_id) -> Event:
@@ -199,9 +218,9 @@ def cancel_enrollment(event_id: int, user: User) -> None:
         raise
 
 
-def list_user_enrollments(user: User) -> list[Event]:
+def list_user_enrollments(user: User) -> list[dict]:
     """Lista eventos nos quais o usuário está inscrito"""
-    return Event.query.join(
+    events = Event.query.join(
         event_participants,
         Event.id == event_participants.c.event_id
     ).filter(
@@ -210,12 +229,29 @@ def list_user_enrollments(user: User) -> list[Event]:
         Event.active == True
     ).order_by(Event.date.asc()).all()
 
+    result = []
+    for event in events:
+        enrolled_count = db.session.query(event_participants).filter_by(
+            event_id=event.id,
+            active=True
+        ).count()
+
+        remaining_slots = None
+        if event.capacity:
+            remaining_slots = event.capacity - enrolled_count
+
+        event_dict = event.to_dict()
+        event_dict['remaining_slots'] = remaining_slots
+
+        result.append(event_dict)
+
+    return result
+
 
 def list_event_participants(event_id: int, organizer_id: int) -> list[User]:
     """Lista participantes de um evento (apenas para organizador)"""
     event = get_by_id(event_id)
 
-    # Verificar se usuário é o organizador
     if event.created_by != organizer_id:
         raise UnauthorizedException(
             "Você não tem permissão para ver os participantes deste evento.")

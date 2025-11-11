@@ -481,7 +481,8 @@ list_available_events = {
                         },
                         "speaker": {"type": "string"},
                         "institution_organizer": {"type": "string"},
-                        "created_by": {"type": "integer"}
+                        "created_by": {"type": "integer"},
+                        "remaining_slots": {"type": "integer", "description": "Vagas restantes (null se sem limite)"}
                     }
                 }
             }
@@ -738,7 +739,8 @@ list_my_enrollments = {
                         "type": {"type": "string"},
                         "speaker": {"type": "string"},
                         "institution_organizer": {"type": "string"},
-                        "created_by": {"type": "integer"}
+                        "created_by": {"type": "integer"},
+                        "remaining_slots": {"type": "integer", "description": "Vagas restantes"}
                     }
                 }
             }

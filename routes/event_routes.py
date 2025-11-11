@@ -96,7 +96,7 @@ def list_available_events():
     """Lista eventos futuros com inscrições abertas"""
     try:
         events = service.list_available_events()
-        return response_resource([event.to_dict() for event in events])
+        return response_resource(events)
     except Exception as e:
         print(e)
         raise
@@ -148,7 +148,7 @@ def list_my_enrollments():
     """Listar minhas inscrições"""
     try:
         events = service.list_user_enrollments(current_user)
-        return response_resource([event.to_dict() for event in events])
+        return response_resource(events)
     except Exception as e:
         print(e)
         raise

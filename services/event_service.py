@@ -1,4 +1,4 @@
-from models import Event, EventType, user
+from models import Event, EventType, User, event_participants
 from app import db
 from exceptions import BadRequestException, NotFoundException
 from exceptions.business_exceptions import UnauthorizedException
@@ -11,11 +11,43 @@ def list_events(user) -> list[Event]:
     return Event.query.filter_by(created_by=user.id, active=True).all()
 
 
+def list_available_events() -> list[Event]:
+    now = datetime.now()
+    return Event.query.filter(
+        Event.active == True,
+        Event.date >= now
+    ).order_by(Event.date.asc()).all()
+
+
 def get_by_id(event_id) -> Event:
     event = Event.query.filter_by(id=event_id, active=True).first()
     if not event:
         raise NotFoundException()
     return event
+
+
+def get_public_event_details(event_id: int) -> dict:
+    event = get_by_id(event_id)
+
+    enrolled_count = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        active=True
+    ).count()
+
+    remaining_slots = None
+    is_full = False
+
+    if event.capacity:
+        remaining_slots = event.capacity - enrolled_count
+        is_full = remaining_slots <= 0
+
+    event_dict = event.to_dict()
+    event_dict['enrolled_count'] = enrolled_count
+    event_dict['remaining_slots'] = remaining_slots
+    event_dict['is_full'] = is_full
+    event_dict['is_past'] = event.date < datetime.now()
+
+    return event_dict
 
 
 def create(event: Event) -> int:
@@ -93,6 +125,109 @@ def deleteAllByUser(user_id: int) -> None:
     except Exception as e:
         db.session.rollback()
         raise
+
+
+def enroll_user(event_id: int, user: User) -> None:
+    event = get_by_id(event_id)
+
+    if event.date < datetime.now():
+        raise BadRequestException(
+            details=[{"event": "Não é possível se inscrever em eventos passados."}])
+
+    existing = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=True
+    ).first()
+
+    if existing:
+        raise BadRequestException(
+            details=[{"enrollment": "Você já está inscrito neste evento."}])
+
+    if event.capacity:
+        enrolled_count = db.session.query(event_participants).filter_by(
+            event_id=event_id,
+            active=True
+        ).count()
+
+        if enrolled_count >= event.capacity:
+            raise BadRequestException(
+                details=[{"event": "Este evento está lotado."}])
+
+    try:
+        stmt = event_participants.insert().values(
+            user_id=user.id,
+            event_id=event_id,
+            registered_at=datetime.now(),
+            active=True
+        )
+        db.session.execute(stmt)
+        db.session.commit()
+    except IntegrityError as e:
+        db.session.rollback()
+        raise BadRequestException(details=[parse_integrity_error(e)])
+    except Exception as e:
+        db.session.rollback()
+        raise
+
+
+def cancel_enrollment(event_id: int, user: User) -> None:
+    event = get_by_id(event_id)
+
+    if event.date < datetime.now():
+        raise BadRequestException(
+            details=[{"event": "Não é possível cancelar inscrição em eventos passados."}])
+
+    enrollment = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=True
+    ).first()
+
+    if not enrollment:
+        raise NotFoundException("Você não está inscrito neste evento.")
+
+    try:
+        stmt = event_participants.update().where(
+            event_participants.c.event_id == event_id,
+            event_participants.c.user_id == user.id
+        ).values(active=False)
+        db.session.execute(stmt)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise
+
+
+def list_user_enrollments(user: User) -> list[Event]:
+    """Lista eventos nos quais o usuário está inscrito"""
+    return Event.query.join(
+        event_participants,
+        Event.id == event_participants.c.event_id
+    ).filter(
+        event_participants.c.user_id == user.id,
+        event_participants.c.active == True,
+        Event.active == True
+    ).order_by(Event.date.asc()).all()
+
+
+def list_event_participants(event_id: int, organizer_id: int) -> list[User]:
+    """Lista participantes de um evento (apenas para organizador)"""
+    event = get_by_id(event_id)
+
+    # Verificar se usuário é o organizador
+    if event.created_by != organizer_id:
+        raise UnauthorizedException(
+            "Você não tem permissão para ver os participantes deste evento.")
+
+    return User.query.join(
+        event_participants,
+        User.id == event_participants.c.user_id
+    ).filter(
+        event_participants.c.event_id == event_id,
+        event_participants.c.active == True,
+        User.active == True
+    ).all()
 
 
 def validate_event_types(event: Event) -> None:

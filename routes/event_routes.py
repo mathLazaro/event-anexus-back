@@ -87,3 +87,82 @@ def delete_event(event_id):
     except Exception as e:
         print(e)
         raise
+
+
+@event_bp.route("/available", methods=["GET"])
+@swag_from(swagger.list_available_events)
+@jwt_required()
+def list_available_events():
+    """RFS08 - Lista eventos futuros com inscrições abertas"""
+    try:
+        events = service.list_available_events()
+        return response_resource([event.to_dict() for event in events])
+    except Exception as e:
+        print(e)
+        raise
+
+
+@event_bp.route("/<int:event_id>/public", methods=["GET"])
+@swag_from(swagger.get_public_event)
+@jwt_required()
+def get_public_event(event_id):
+    """RFS08 - Detalhes públicos do evento com vagas restantes"""
+    try:
+        event_details = service.get_public_event_details(event_id)
+        return response_resource(event_details)
+    except Exception as e:
+        print(e)
+        raise
+
+
+@event_bp.route("/<int:event_id>/enrollments", methods=["POST"])
+@swag_from(swagger.enroll_in_event)
+@jwt_required()
+def enroll_in_event(event_id):
+    """RFS09 - Inscrever-se em um evento"""
+    try:
+        service.enroll_user(event_id, current_user)
+        return response_resource({"message": "Inscrição realizada com sucesso"})
+    except Exception as e:
+        print(e)
+        raise
+
+
+@event_bp.route("/<int:event_id>/enrollments", methods=["DELETE"])
+@swag_from(swagger.cancel_enrollment)
+@jwt_required()
+def cancel_enrollment(event_id):
+    """RFS10 - Cancelar inscrição em evento"""
+    try:
+        service.cancel_enrollment(event_id, current_user)
+        return "", 204
+    except Exception as e:
+        print(e)
+        raise
+
+
+@event_bp.route("/my-enrollments", methods=["GET"])
+@swag_from(swagger.list_my_enrollments)
+@jwt_required()
+def list_my_enrollments():
+    """Lista eventos nos quais estou inscrito"""
+    try:
+        events = service.list_user_enrollments(current_user)
+        return response_resource([event.to_dict() for event in events])
+    except Exception as e:
+        print(e)
+        raise
+
+
+@event_bp.route("/<int:event_id>/participants", methods=["GET"])
+@swag_from(swagger.list_event_participants)
+@jwt_required()
+@require_organizer_grant()
+def list_participants(event_id):
+    """Lista participantes do evento (apenas organizador)"""
+    try:
+        participants = service.list_event_participants(event_id, current_user.id)
+        return response_resource([user.to_dict() for user in participants])
+    except Exception as e:
+        print(e)
+        raise

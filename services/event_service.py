@@ -153,15 +153,21 @@ def enroll_user(event_id: int, user: User) -> None:
         raise BadRequestException(
             details=[{"event": "Não é possível se inscrever em eventos passados."}])
 
-    existing = db.session.query(event_participants).filter_by(
+    existing_active = db.session.query(event_participants).filter_by(
         event_id=event_id,
         user_id=user.id,
         active=True
     ).first()
 
-    if existing:
+    if existing_active:
         raise BadRequestException(
             details=[{"enrollment": "Você já está inscrito neste evento."}])
+
+    existing_inactive = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=False
+    ).first()
 
     if event.capacity:
         enrolled_count = db.session.query(event_participants).filter_by(
@@ -174,13 +180,24 @@ def enroll_user(event_id: int, user: User) -> None:
                 details=[{"event": "Este evento está lotado."}])
 
     try:
-        stmt = event_participants.insert().values(
-            user_id=user.id,
-            event_id=event_id,
-            registered_at=datetime.now(),
-            active=True
-        )
-        db.session.execute(stmt)
+        if existing_inactive:
+            stmt = event_participants.update().where(
+                (event_participants.c.event_id == event_id)
+                & (event_participants.c.user_id == user.id)
+            ).values(
+                active=True,
+                registered_at=datetime.now()
+            )
+            db.session.execute(stmt)
+        else:
+            stmt = event_participants.insert().values(
+                user_id=user.id,
+                event_id=event_id,
+                registered_at=datetime.now(),
+                active=True
+            )
+            db.session.execute(stmt)
+
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()

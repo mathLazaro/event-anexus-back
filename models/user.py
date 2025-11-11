@@ -47,3 +47,6 @@ class User(db.Model):
 
     def generate_auth_token(self):
         return create_access_token(identity=str(self.id))
+
+    def is_organizer(self):
+        return self.type == UserType.ORGANIZER

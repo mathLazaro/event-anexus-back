@@ -43,6 +43,7 @@ def create_app():
 
     app.register_blueprint(routes.user_bp)
     app.register_blueprint(routes.auth_bp)
+    app.register_blueprint(routes.event_bp)
 
     # Registrar handlers de erro
     @app.errorhandler(BadRequestException)
@@ -68,7 +69,10 @@ def create_app():
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data) -> models.User:
         identity = jwt_data["sub"]
-        return models.User.query.get(int(identity))
+        user = models.User.query.filter_by(id=int(identity), active=True).first()
+        if not user:
+            raise UnauthorizedException("Usuário inválido.")
+        return user
 
     return app
 

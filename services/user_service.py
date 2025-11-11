@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from utils import parse_integrity_error
 import secrets
 from datetime import datetime, timedelta
+import services.event_service as event_service
 
 
 def find_user_by_id(id: int) -> User:
@@ -177,6 +178,9 @@ def delete_user() -> None:
     user.active = False
     db.session.merge(user)
     db.session.commit()
+
+    event_service.deleteAllByUser(user.id)
+
     # TODO - Remover relacionamentos do usuário (Eventos, Convites, etc)
 
 

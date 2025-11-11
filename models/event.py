@@ -19,6 +19,7 @@ class Event(db.Model):
     institution_organizer = db.Column(db.String(200), nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     creator = db.relationship('User', backref=db.backref('events', lazy=True))
+    active = db.Column(db.Boolean(), default=True, nullable=False)
 
     @staticmethod
     def from_dict(data: dict) -> "Event":

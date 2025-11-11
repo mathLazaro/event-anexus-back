@@ -8,11 +8,11 @@ from utils import parse_integrity_error
 
 
 def list_events(user) -> list[Event]:
-    return Event.query.filter_by(created_by=user.id).all()
+    return Event.query.filter_by(created_by=user.id, active=True).all()
 
 
 def get_by_id(event_id) -> Event:
-    event = Event.query.get(event_id)
+    event = Event.query.get(event_id, active=True)
     if not event:
         raise NotFoundException()
     return event
@@ -38,7 +38,7 @@ def create(event: Event) -> int:
 
 def update(event_id, event: Event, user_id: int) -> int:
 
-    db_event = Event.query.get(event_id)
+    db_event = Event.query.get(event_id, active=True)
     if not db_event:
         raise NotFoundException()
 
@@ -67,16 +67,16 @@ def update(event_id, event: Event, user_id: int) -> int:
 
 
 def delete(event_id: int, user_id: int) -> None:
-    event = Event.query.get(event_id)
+    event = Event.query.get(event_id, active=True)
     if not event:
         raise NotFoundException()
 
-    # Verifica se o usuário é o criador do evento
     if event.created_by != user_id:
         raise UnauthorizedException("Você não tem permissão para excluir este evento.")
 
+    event.active = False
+
     try:
-        db.session.delete(event)
         db.session.commit()
     except Exception as e:
         db.session.rollback()

@@ -38,20 +38,32 @@ class Event(db.Model):
                 try:
                     event.type = EventType[data['type'].upper()]
                 except KeyError:
-                    event.type = EventType(data['type'])
-                except KeyError:
-                    raise BadRequestException(
-                        f"Tipo de evento inválido: {data['type']}")
+                    try:
+                        event.type = EventType(data['type'])
+                    except (KeyError, ValueError):
+                        raise BadRequestException(
+                            details=[{"type": f"Tipo de evento inválido: {data['type']}"}])
 
         if 'date' in data:
             if isinstance(data['date'], datetime):
                 event.date = data['date']
             elif isinstance(data['date'], str):
-                event.date = datetime.fromisoformat(data['date'])
+                try:
+                    event.date = datetime.fromisoformat(data['date'])
+                except (ValueError, TypeError) as e:
+                    raise BadRequestException(
+                        details=[{"date": "Formato de data inválido. Use o formato ISO: YYYY-MM-DDTHH:MM:SS"}])
+            else:
+                raise BadRequestException(
+                    details=[{"date": "Data deve ser uma string no formato ISO ou objeto datetime"}])
 
         if 'time' in data:
             if isinstance(data['time'], str):
-                event.time = datetime.strptime(data['time'], "%H:%M").time()
+                try:
+                    event.time = datetime.strptime(data['time'], "%H:%M").time()
+                except ValueError:
+                    raise BadRequestException(
+                        details=[{"time": "Formato de hora inválido. Use o formato HH:MM (ex: 14:30)"}])
             else:
                 event.time = data['time']
 

@@ -1,3 +1,4 @@
+from flask_jwt_extended import current_user
 from models import Event, EventType, User, event_participants
 from app import db
 from exceptions import BadRequestException, NotFoundException
@@ -30,8 +31,16 @@ def list_available_events() -> list[dict]:
         if event.capacity:
             remaining_slots = event.capacity - enrolled_count
 
+        # Verifica se o usuário está inscrito no evento
+        is_participant = db.session.query(event_participants).filter_by(
+            event_id=event.id,
+            user_id=current_user.id,
+            active=True
+        ).first() is not None
+
         event_dict = event.to_dict()
         event_dict['remaining_slots'] = remaining_slots
+        event_dict['is_participant'] = is_participant
 
         result.append(event_dict)
 
@@ -47,6 +56,7 @@ def get_by_id(event_id) -> Event:
 
 def get_public_event_details(event_id: int) -> dict:
     event = get_by_id(event_id)
+    user: User = current_user
 
     enrolled_count = db.session.query(event_participants).filter_by(
         event_id=event_id,
@@ -65,6 +75,11 @@ def get_public_event_details(event_id: int) -> dict:
     event_dict['remaining_slots'] = remaining_slots
     event_dict['is_full'] = is_full
     event_dict['is_past'] = event.date < datetime.now()
+    event_dict['is_participant'] = db.session.query(event_participants).filter_by(
+        event_id=event_id,
+        user_id=user.id,
+        active=True
+    ).first() is not None
 
     return event_dict
 

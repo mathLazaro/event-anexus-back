@@ -100,20 +100,6 @@ MAIL_PASSWORD=sua_senha_de_aplicativo
 
 ## 🗃️ Configuração do Banco de Dados
 
-### 1️⃣ Inicializar as migrações
-
-```bash
-flask db init
-```
-
-### 2️⃣ Criar migração
-
-```bash
-flask db migrate -m "create initial tables"
-```
-
-### 3️⃣ Aplicar migrações
-
 ```bash
 flask db upgrade
 ```
@@ -139,7 +125,7 @@ A API estará disponível em:
 
 Acesse o Swagger UI em:
 
-👉 [http://127.0.0.1:5000/api/docs](http://127.0.0.1:5000/api/docs)
+👉 [http://127.0.0.1:5000/apidocs](http://127.0.0.1:5000/apidocs)
 
 ---
 

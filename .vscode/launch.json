@@ -9,7 +9,8 @@
             "envFile": "${workspaceFolder}/.env",
             "env": {
                 "FLASK_APP": "app.py",
-                "FLASK_ENV": "development"
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1"
             },
             "args": ["run"],
             "jinja": true,

@@ -31,7 +31,6 @@ def list_available_events() -> list[dict]:
         if event.capacity:
             remaining_slots = event.capacity - enrolled_count
 
-        # Verifica se o usuário está inscrito no evento
         is_participant = db.session.query(event_participants).filter_by(
             event_id=event.id,
             user_id=current_user.id,

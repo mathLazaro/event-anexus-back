@@ -4,6 +4,7 @@ from models.event_participant import event_participants
 from sqlalchemy import Enum as SqlEnum
 from datetime import datetime
 from exceptions.business_exceptions import BadRequestException
+from utils.format_utils import format_date, format_event_type, format_hour, format_hour
 
 
 class Event(db.Model):
@@ -42,41 +43,13 @@ class Event(db.Model):
                 setattr(event, field, data[field])
 
         if 'type' in data:
-            if isinstance(data['type'], EventType):
-                event.type = data['type']
-            else:
-                # Tenta por nome (WORKSHOP) ou por valor (Workshop)
-                try:
-                    event.type = EventType[data['type'].upper()]
-                except KeyError:
-                    try:
-                        event.type = EventType(data['type'])
-                    except (KeyError, ValueError):
-                        raise BadRequestException(
-                            details=[{"type": f"Tipo de evento inválido: {data['type']}"}])
+            event.type = format_event_type(data['type'])
 
         if 'date' in data:
-            if isinstance(data['date'], datetime):
-                event.date = data['date']
-            elif isinstance(data['date'], str):
-                try:
-                    event.date = datetime.fromisoformat(data['date'])
-                except (ValueError, TypeError) as e:
-                    raise BadRequestException(
-                        details=[{"date": "Formato de data inválido. Use o formato ISO: YYYY-MM-DDTHH:MM:SS"}])
-            else:
-                raise BadRequestException(
-                    details=[{"date": "Data deve ser uma string no formato ISO ou objeto datetime"}])
+            event.date = format_date(data['date'])
 
         if 'time' in data:
-            if isinstance(data['time'], str):
-                try:
-                    event.time = datetime.strptime(data['time'], "%H:%M").time()
-                except ValueError:
-                    raise BadRequestException(
-                        details=[{"time": "Formato de hora inválido. Use o formato HH:MM (ex: 14:30)"}])
-            else:
-                event.time = data['time']
+            event.time = format_hour(data['time'])
 
         return event
 

@@ -46,7 +46,7 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     def generate_auth_token(self):
-        return create_access_token(identity=str(self.id))
+        return create_access_token(identity=str(self.id), expires_delta=False)
 
     def is_organizer(self):
         return self.type == UserType.ORGANIZER

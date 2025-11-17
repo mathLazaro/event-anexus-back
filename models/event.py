@@ -2,9 +2,7 @@ from app import db
 from models.event_type import EventType
 from models.event_participant import event_participants
 from sqlalchemy import Enum as SqlEnum
-from datetime import datetime
-from exceptions.business_exceptions import BadRequestException
-from utils.format_utils import format_date, format_event_type, format_hour, format_hour
+from utils.format_utils import format_date, format_event_type
 
 
 class Event(db.Model):
@@ -14,7 +12,6 @@ class Event(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.DateTime, nullable=False)
-    time = db.Column(db.Time, nullable=False)
     location = db.Column(db.String(200), nullable=False)
     capacity = db.Column(db.Integer, nullable=True)
     type = db.Column(SqlEnum(EventType), nullable=False)
@@ -46,10 +43,7 @@ class Event(db.Model):
             event.type = format_event_type(data['type'])
 
         if 'date' in data:
-            event.date = format_date(data['date'])
-
-        if 'time' in data:
-            event.time = format_hour(data['time'])
+            event.date = format_date(data['date'], data.get('time'))
 
         return event
 
@@ -59,7 +53,7 @@ class Event(db.Model):
             "title": self.title,
             "description": self.description,
             "date": self.date.isoformat() if self.date else None,
-            "time": self.time.strftime("%H:%M") if self.time else None,
+            "time": self.date.strftime("%H:%M") if self.date else None,
             "location": self.location,
             "capacity": self.capacity,
             "type": self.type.value if self.type else None,

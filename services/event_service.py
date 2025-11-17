@@ -290,6 +290,20 @@ def list_user_enrollments(user: User) -> list[dict]:
         event_dict = event.to_dict()
         event_dict['remaining_slots'] = remaining_slots
 
+        # Buscar certificado se o evento já passou
+        certificate_id = None
+        if event.date < datetime.now():
+            from domain.models.certificate import Certificate
+            certificate = Certificate.query.filter_by(
+                event_id=event.id,
+                user_id=user.id,
+                active=True
+            ).first()
+            if certificate:
+                certificate_id = certificate.id
+
+        event_dict['certificate_id'] = certificate_id
+
         result.append(event_dict)
 
     return result

@@ -1,5 +1,7 @@
 
+import base64
 from datetime import datetime
+import json
 from sqlalchemy.orm import Query
 from domain.models import EventType, Event
 from utils.format_utils import format_date, format_event_type
@@ -20,7 +22,11 @@ class EventFilterDTO:
     order_direction: str = 'asc'  # 'asc' | 'desc'
 
     @staticmethod
-    def from_dict(data: dict) -> "EventFilterDTO":
+    def from_dict(data: str) -> "EventFilterDTO":
+
+        data = base64.b64decode(data).decode('utf-8')
+        data = json.loads(data)
+
         event_filter = EventFilterDTO()
 
         for field in ['title', 'description', 'location', 'speaker', 'institution_organizer', 'created_by', 'q', 'order_by', 'order_direction']:

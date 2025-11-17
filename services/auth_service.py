@@ -7,7 +7,10 @@ def login(email: str, password: str) -> str:
     if not email or not password:
         raise BadRequestException("Email e senha são obrigatórios.")
 
-    user: User = user_service.find_user_by_email(email)
+    try:
+        user: User = user_service.find_user_by_email(email)
+    except Exception:
+        raise UnauthorizedException("Credenciais inválidas.")
     if not user or not user.check_password(password):
         raise UnauthorizedException("Credenciais inválidas.")
 

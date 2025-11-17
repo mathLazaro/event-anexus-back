@@ -1,8 +1,39 @@
+event_filter_schema = {
+    "type": "object",
+    "description": "Schema do EventFilterDTO. Monte um JSON com estes campos e codifique em base64 ao passar como query param 'filter'.",
+    "properties": {
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "date_from": {"type": "string", "format": "date-time", "example": "2025-12-01T00:00:00"},
+        "date_to": {"type": "string", "format": "date-time", "example": "2025-12-31T23:59:59"},
+        "location": {"type": "string"},
+        "type": {"type": "string", "enum": ["WORKSHOP", "LECTURE", "CONFERENCE", "SEMINAR", "HACKATHON", "MEETUP", "TRAINING", "WEBINAR", "OTHER"]},
+        "speaker": {"type": "string"},
+        "institution_organizer": {"type": "string"},
+        "created_by": {"type": "integer"},
+        "q": {"type": "string", "description": "Pesquisa livre: title | description | location | speaker | institution_organizer"},
+        "order_by": {"type": "string", "enum": ["date", "title", "capacity", "location", "type", "speaker", "institution_organizer"], "default": "date"},
+        "order_direction": {"type": "string", "enum": ["asc", "desc"], "default": "asc"}
+    }
+}
+
 list_events = {
     "tags": ["Eventos"],
     "summary": "Listar eventos do usuário autenticado",
     "description": "Retorna todos os eventos criados pelo usuário organizador autenticado",
     "security": [{"Bearer": []}],
+    "parameters": [
+        {
+            "name": "filter",
+            "in": "query",
+            "required": False,
+            "description": "Filtro em base64 do `EventFilterDTO`.",
+            "schema": {
+                "type": "string",
+                "example": "ewogICJkYXRlX2Zyb20iOiAiMjAyNS0xMi0wMVQwOTowMDowMCIsCiAgImRhdGVfdG8iOiAiMjAyNS0xMi0zMVQxODowMDowMCIsCiAgInR5cGUiOiAiV09SS1NIT1AiCn0="
+            }
+        }
+    ],
     "responses": {
         200: {
             "description": "Lista de eventos",
@@ -459,6 +490,18 @@ list_available_events = {
     "summary": "Listar eventos disponíveis",
     "description": "Lista eventos futuros com inscrições abertas. Exibe informações resumidas e permite filtros.",
     "security": [{"Bearer": []}],
+    "parameters": [
+        {
+            "name": "filter",
+            "in": "query",
+            "required": False,
+            "description": "Filtro em base64 do `EventFilterDTO`.",
+            "schema": {
+                "type": "string",
+                "example": "ewogICJkYXRlX2Zyb20iOiAiMjAyNS0xMi0wMVQwOTowMDowMCIsCiAgImRhdGVfdG8iOiAiMjAyNS0xMi0zMVQxODowMDowMCIsCiAgInR5cGUiOiAiV09SS1NIT1AiCn0="
+            }
+        }
+    ],
     "responses": {
         200: {
             "description": "Lista de eventos disponíveis",

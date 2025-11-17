@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import docs.events_docs as swagger
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "instance" / "database.db"
@@ -35,5 +36,25 @@ class Config:
             {
                 'Bearer': []
             }
-        ]
+        ],
+        # Expor o schema do EventFilterDTO nas definitions para que o Swagger UI o mostre
+        'definitions': {
+            'EventFilterDTO': {
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'description': {'type': 'string'},
+                    'date_from': {'type': 'string', 'format': 'date-time', 'example': '2025-12-01T00:00:00'},
+                    'date_to': {'type': 'string', 'format': 'date-time', 'example': '2025-12-31T23:59:59'},
+                    'location': {'type': 'string'},
+                    'type': {'type': 'string', 'enum': ['WORKSHOP', 'LECTURE', 'CONFERENCE', 'SEMINAR', 'HACKATHON', 'MEETUP', 'TRAINING', 'WEBINAR', 'OTHER']},
+                    'speaker': {'type': 'string'},
+                    'institution_organizer': {'type': 'string'},
+                    'created_by': {'type': 'integer'},
+                    'q': {'type': 'string', 'description': 'Pesquisa livre: title | description | location | speaker | institution_organizer'},
+                    'order_by': {'type': 'string', 'enum': ['date', 'title', 'capacity', 'location', 'type', 'speaker', 'institution_organizer'], 'default': 'date'},
+                    'order_direction': {'type': 'string', 'enum': ['asc', 'desc'], 'default': 'asc'}
+                }
+            }
+        }
     }

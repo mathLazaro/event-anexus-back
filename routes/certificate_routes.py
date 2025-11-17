@@ -4,6 +4,7 @@ from flasgger import swag_from
 import os
 
 import services.certificate_service as service
+import services.email_service as email_service
 import docs.certificates_docs as swagger
 from exceptions import *
 from utils.response import *
@@ -71,10 +72,9 @@ def download_certificate(certificate_id):
 def send_certificate_email(certificate_id):
     """Reenviar certificado por email"""
     try:
-        # TODO consertar rota
         certificate = service.CertificateService.get_certificate_by_id(
             certificate_id, current_user.id)
-        service.CertificateService.send_certificate_by_email(certificate_id)
+        email_service.send_certificate_by_email(certificate, current_user)
         return response_resource({"message": "Certificado enviado por email com sucesso"})
     except Exception as e:
         print(e)

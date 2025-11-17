@@ -2,7 +2,7 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 
-from models.user_type import UserType
+from domain.models.user_type import UserType
 
 
 class User(db.Model):

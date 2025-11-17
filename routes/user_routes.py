@@ -1,7 +1,7 @@
 from flasgger import swag_from
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User
+from domain import User
 import services.user_service as service
 from exceptions import BadRequestException
 from utils.response import response_created, response_resource

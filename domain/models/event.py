@@ -1,6 +1,6 @@
 from app import db
-from models.event_type import EventType
-from models.event_participant import event_participants
+from domain.models.event_type import EventType
+from domain.models.event_participant import event_participants
 from sqlalchemy import Enum as SqlEnum
 from utils.format_utils import format_date, format_event_type
 

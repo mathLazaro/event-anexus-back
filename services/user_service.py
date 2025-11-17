@@ -1,6 +1,6 @@
 from exceptions import BadRequestException, NotFoundException
 from exceptions.business_exceptions import UnauthorizedException
-from models import User, UserType
+from domain import User, UserType
 from app import db
 from flask_jwt_extended import current_user
 import re

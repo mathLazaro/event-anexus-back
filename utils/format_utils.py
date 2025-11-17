@@ -1,9 +1,9 @@
 from datetime import datetime
-from models.event_type import EventType
+from domain.models.event_type import EventType
 from exceptions.business_exceptions import BadRequestException
 
 
-def format_date(date: str, time:str=None) -> datetime:
+def format_date(date: str, time: str = None) -> datetime:
     if isinstance(date, datetime):
         return date
     elif isinstance(date, str):
@@ -17,6 +17,7 @@ def format_date(date: str, time:str=None) -> datetime:
     else:
         raise BadRequestException(
             details=[{"date": "Data deve ser uma string no formato ISO ou objeto datetime"}])
+
 
 def format_event_type(event_type):
     if isinstance(event_type, EventType):

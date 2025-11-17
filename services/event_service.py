@@ -1,5 +1,5 @@
 from flask_jwt_extended import current_user
-from models import Event, EventType, User, event_participants
+from domain import Event, EventType, User, event_participants, EventFilterDTO
 from app import db
 from exceptions import BadRequestException, NotFoundException
 from exceptions.business_exceptions import UnauthorizedException
@@ -8,17 +8,35 @@ from sqlalchemy.exc import IntegrityError
 from utils import parse_integrity_error
 
 
-def list_events(user) -> list[Event]:
-    return Event.query.filter_by(created_by=user.id, active=True).all()
+def list_events(user, filter: EventFilterDTO) -> list[Event]:
+    """ Lista eventos criados pelo organizador, com filtros opcionais"""
+    query = Event.query.filter_by(
+        created_by=user.id,
+        active=True
+    )
+
+    if filter:
+        if filter.created_by:
+            filter.created_by = None  # Ignorar filtro created_by para organizadores
+        query = filter.build_filters(query)
+
+    return query.all()
 
 
-def list_available_events() -> list[dict]:
-    """RFS08 - Lista eventos futuros com inscrições abertas"""
+def list_available_events(filter: EventFilterDTO) -> list[dict]:
+    """ Lista eventos futuros com inscrições abertas"""
     now = datetime.now()
-    events = Event.query.filter(
+
+    query = Event.query
+    query.filter(
         Event.active == True,
         Event.date >= now
-    ).order_by(Event.date.asc()).all()
+    )
+
+    if filter:
+        query = filter.build_filters(query)
+
+    events = query.all()
 
     result = []
     for event in events:

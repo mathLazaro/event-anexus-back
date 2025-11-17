@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 instance/*.db
+instance/certificates/*
 venv/
 .venv/
 .env

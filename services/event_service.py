@@ -1,5 +1,5 @@
 from flask_jwt_extended import current_user
-from models import Event, EventType, User, event_participants
+from domain import Event, EventType, User, event_participants, EventFilterDTO
 from app import db
 from exceptions import BadRequestException, NotFoundException
 from exceptions.business_exceptions import UnauthorizedException
@@ -8,17 +8,35 @@ from sqlalchemy.exc import IntegrityError
 from utils import parse_integrity_error
 
 
-def list_events(user) -> list[Event]:
-    return Event.query.filter_by(created_by=user.id, active=True).all()
+def list_events(user, filter: EventFilterDTO) -> list[Event]:
+    """ Lista eventos criados pelo organizador, com filtros opcionais"""
+    query = Event.query.filter_by(
+        created_by=user.id,
+        active=True
+    )
+
+    if filter:
+        if filter.created_by:
+            filter.created_by = None  # Ignorar filtro created_by para organizadores
+        query = filter.build_filters(query)
+
+    return query.all()
 
 
-def list_available_events() -> list[dict]:
-    """RFS08 - Lista eventos futuros com inscrições abertas"""
+def list_available_events(filter: EventFilterDTO) -> list[dict]:
+    """ Lista eventos futuros com inscrições abertas"""
     now = datetime.now()
-    events = Event.query.filter(
+
+    query = Event.query
+    query.filter(
         Event.active == True,
         Event.date >= now
-    ).order_by(Event.date.asc()).all()
+    )
+
+    if filter:
+        query = filter.build_filters(query)
+
+    events = query.all()
 
     result = []
     for event in events:
@@ -31,7 +49,6 @@ def list_available_events() -> list[dict]:
         if event.capacity:
             remaining_slots = event.capacity - enrolled_count
 
-        # Verifica se o usuário está inscrito no evento
         is_participant = db.session.query(event_participants).filter_by(
             event_id=event.id,
             user_id=current_user.id,
@@ -111,10 +128,8 @@ def update(event_id, event: Event, user_id: int) -> int:
     if db_event.created_by != user_id:
         raise UnauthorizedException("Você não tem permissão para editar este evento.")
 
-    event.created_by = db_event.created_by
-
     validate_event_types(event)
-    validate_event(event)
+    validate_event(event, is_update=True)
 
     event.id = db_event.id
     event.created_by = db_event.created_by
@@ -310,9 +325,6 @@ def validate_event_types(event: Event) -> None:
     if not isinstance(event.date, datetime):
         errors.append({"date": "A data do evento deve ser um datetime válido."})
 
-    if not hasattr(event.time, 'hour'):  # Verifica se é um objeto time
-        errors.append({"time": "A hora do evento deve ser um time válido."})
-
     if not isinstance(event.location, str):
         errors.append({"location": "O local do evento deve ser uma string."})
 
@@ -350,19 +362,8 @@ def validate_event(event: Event, is_update: bool = False) -> None:
     if event.date is None:
         errors.append({"date": "A data do evento é obrigatória."})
     else:
-        # Compara apenas a data (sem hora)
-        event_date_only = event.date.date() if isinstance(event.date, datetime) else event.date
-        today = datetime.now().date()
-
-        if event_date_only < today:
+        if event.date < datetime.now():
             errors.append({"date": "A data do evento não pode ser no passado."})
-        elif event_date_only == today and event.time is not None:
-            # Se for hoje, valida se a hora já passou
-            if event.time < datetime.now().time():
-                errors.append({"time": "A hora do evento não pode ser no passado."})
-
-    if event.time is None:
-        errors.append({"time": "A hora do evento é obrigatória."})
 
     if event.location is None or event.location.strip() == "":
         errors.append({"location": "O local do evento é obrigatório."})

@@ -2,7 +2,7 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 
-from models.user_type import UserType
+from domain.models.user_type import UserType
 
 
 class User(db.Model):
@@ -46,7 +46,7 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     def generate_auth_token(self):
-        return create_access_token(identity=str(self.id))
+        return create_access_token(identity=str(self.id), expires_delta=False)
 
     def is_organizer(self):
         return self.type == UserType.ORGANIZER

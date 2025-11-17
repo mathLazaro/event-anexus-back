@@ -1,9 +1,8 @@
 from app import db
-from models.event_type import EventType
-from models.event_participant import event_participants
+from domain.models.event_type import EventType
+from domain.models.event_participant import event_participants
 from sqlalchemy import Enum as SqlEnum
-from datetime import datetime
-from exceptions.business_exceptions import BadRequestException
+from utils.format_utils import format_date, format_event_type
 
 
 class Event(db.Model):
@@ -13,7 +12,6 @@ class Event(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.DateTime, nullable=False)
-    time = db.Column(db.Time, nullable=False)
     location = db.Column(db.String(200), nullable=False)
     capacity = db.Column(db.Integer, nullable=True)
     type = db.Column(SqlEnum(EventType), nullable=False)
@@ -42,41 +40,10 @@ class Event(db.Model):
                 setattr(event, field, data[field])
 
         if 'type' in data:
-            if isinstance(data['type'], EventType):
-                event.type = data['type']
-            else:
-                # Tenta por nome (WORKSHOP) ou por valor (Workshop)
-                try:
-                    event.type = EventType[data['type'].upper()]
-                except KeyError:
-                    try:
-                        event.type = EventType(data['type'])
-                    except (KeyError, ValueError):
-                        raise BadRequestException(
-                            details=[{"type": f"Tipo de evento inválido: {data['type']}"}])
+            event.type = format_event_type(data['type'])
 
         if 'date' in data:
-            if isinstance(data['date'], datetime):
-                event.date = data['date']
-            elif isinstance(data['date'], str):
-                try:
-                    event.date = datetime.fromisoformat(data['date'])
-                except (ValueError, TypeError) as e:
-                    raise BadRequestException(
-                        details=[{"date": "Formato de data inválido. Use o formato ISO: YYYY-MM-DDTHH:MM:SS"}])
-            else:
-                raise BadRequestException(
-                    details=[{"date": "Data deve ser uma string no formato ISO ou objeto datetime"}])
-
-        if 'time' in data:
-            if isinstance(data['time'], str):
-                try:
-                    event.time = datetime.strptime(data['time'], "%H:%M").time()
-                except ValueError:
-                    raise BadRequestException(
-                        details=[{"time": "Formato de hora inválido. Use o formato HH:MM (ex: 14:30)"}])
-            else:
-                event.time = data['time']
+            event.date = format_date(data['date'], data.get('time'))
 
         return event
 
@@ -86,7 +53,7 @@ class Event(db.Model):
             "title": self.title,
             "description": self.description,
             "date": self.date.isoformat() if self.date else None,
-            "time": self.time.strftime("%H:%M") if self.time else None,
+            "time": self.date.strftime("%H:%M") if self.date else None,
             "location": self.location,
             "capacity": self.capacity,
             "type": self.type.value if self.type else None,

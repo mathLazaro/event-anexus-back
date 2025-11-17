@@ -1,5 +1,5 @@
 from exceptions import UnauthorizedException, BadRequestException
-from models import User
+from domain import User
 from services import email_service, user_service
 
 

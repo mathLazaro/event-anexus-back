@@ -6,7 +6,7 @@ import services.event_service as service
 import docs.events_docs as swagger
 from exceptions import *
 from utils.response import *
-from models import Event
+from domain import Event, EventFilterDTO
 
 
 event_bp = Blueprint("event_bp", __name__, url_prefix="/events")
@@ -18,7 +18,9 @@ event_bp = Blueprint("event_bp", __name__, url_prefix="/events")
 @require_organizer_grant()
 def list_events():
     try:
-        events = service.list_events(current_user)
+        filter_data = request.args.get('filter')
+        filter = EventFilterDTO.from_dict(filter_data) if filter_data else None
+        events = service.list_events(current_user, filter)
         return response_resource([event.to_dict() for event in events])
     except Exception as e:
         print(e)
@@ -95,7 +97,9 @@ def delete_event(event_id):
 def list_available_events():
     """Lista eventos futuros com inscrições abertas"""
     try:
-        events = service.list_available_events()
+        filter_data = request.args.get('filter')
+        filter = EventFilterDTO.from_dict(filter_data) if filter_data else None
+        events = service.list_available_events(filter)
         return response_resource(events)
     except Exception as e:
         print(e)

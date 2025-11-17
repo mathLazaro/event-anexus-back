@@ -38,7 +38,7 @@ def create_app():
     CORS(app)
     Swagger(app)
 
-    import models
+    import domain.models
     import routes
 
     app.register_blueprint(routes.user_bp)
@@ -67,9 +67,9 @@ def create_app():
         return {"error": "Internal Server Error"}, 500
 
     @jwt.user_lookup_loader
-    def user_lookup_callback(_jwt_header, jwt_data) -> models.User:
+    def user_lookup_callback(_jwt_header, jwt_data) -> domain.User:
         identity = jwt_data["sub"]
-        user = models.User.query.filter_by(id=int(identity), active=True).first()
+        user = domain.User.query.filter_by(id=int(identity), active=True).first()
         if not user:
             raise UnauthorizedException("Usuário inválido.")
         return user

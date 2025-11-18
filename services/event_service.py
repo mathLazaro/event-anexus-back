@@ -28,7 +28,7 @@ def list_available_events(filter: EventFilterDTO) -> list[dict]:
     now = datetime.now()
 
     query = Event.query
-    query.filter(
+    query = query.filter(
         Event.active == True,
         Event.date >= now
     )

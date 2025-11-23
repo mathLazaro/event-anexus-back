@@ -1,34 +1,45 @@
 import pytest
 import os
-import tempfile
-from app import create_app, db
-from domain.models import User, UserType
+
+os.environ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+os.environ['TESTING'] = '1'
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def app():
-    """Cria uma instância da aplicação para testes"""
-    db_fd, db_path = tempfile.mkstemp()
+    """
+    Cria uma instância da aplicação para testes com banco de dados EM MEMÓRIA.
 
-    app = create_app()
+    IMPORTANTE: Este fixture usa SQLite EM MEMÓRIA (sqlite:///:memory:) que é:
+    - Criado TOTALMENTE na RAM, sem tocar o disco
+    - Completamente separado do banco de produção (instance/database.db)
+    - Automaticamente destruído quando o teste termina
+    - ZERO possibilidade de afetar o banco de produção
 
-    # Configurar para testes
-    app.config.update({
-        'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
-        'SECRET_KEY': 'test-secret-key',
-        'JWT_SECRET_KEY': 'test-jwt-secret',
-        'MAIL_SUPPRESS_SEND': True,
-        'WTF_CSRF_ENABLED': False
-    })
+    O banco de produção NUNCA é tocado pelos testes!
+    """
+    from app import create_app, db
 
-    with app.app_context():
+    test_app = create_app()
+
+    # Garantir que as configurações de teste estão ativas
+    test_app.config['TESTING'] = True
+    test_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    test_app.config['MAIL_SUPPRESS_SEND'] = True
+    test_app.config['WTF_CSRF_ENABLED'] = False
+    test_app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+    test_app.config['SQLALCHEMY_ECHO'] = False
+
+    with test_app.app_context():
+        # Criar todas as tabelas no banco EM MEMÓRIA
         db.create_all()
-        yield app
-        db.drop_all()
 
-    os.close(db_fd)
-    os.unlink(db_path)
+        yield test_app
+
+        # Limpar sessão
+        db.session.remove()
+        # Dropar tabelas (apenas do banco em memória - que já vai sumir)
+        db.drop_all()
 
 
 @pytest.fixture
@@ -43,8 +54,14 @@ def runner(app):
     return app.test_cli_runner()
 
 
-def create_test_user(name="João Silva", email="joao@test.com", password="123456", user_type=UserType.REGULAR):
+def create_test_user(name="João Silva", email="joao@test.com", password="123456", user_type=None):
     """Helper para criar usuário de teste"""
+    from app import db
+    from domain.models import User, UserType
+
+    if user_type is None:
+        user_type = UserType.REGULAR
+
     user = User()
     user.name = name
     user.email = email

@@ -11,8 +11,8 @@ from flask import current_app
 from flask_mail import Message
 
 from app import db
-from domain.models import Certificate, Event, User, event_participants
-from services import email_service
+from domain.models import Certificate, Event, User, event_participants, Notification
+from services import email_service, notification_service
 from exceptions import BadRequestException, NotFoundException
 
 
@@ -293,7 +293,29 @@ class CertificateService:
                                 f"Erro ao enviar certificado {certificate.id}: {str(e)}")
                             continue
 
+                    for certificate in certificates:
+                        try:
+                            CertificateService._create_notification_for_certificate(
+                                certificate)
+                        except Exception as e:
+                            current_app.logger.error(
+                                f"Erro ao criar notificação para certificado {certificate.id}: {str(e)}")
+                            continue
+
             except Exception as e:
                 current_app.logger.error(
                     f"Erro ao processar evento {event.id}: {str(e)}")
                 continue
+
+    @staticmethod
+    def _create_notification_for_certificate(certificate: Certificate):
+        """Cria notificação para o usuário sobre o certificado gerado"""
+
+        notification = Notification()
+
+        notification.title = "Certificado Gerado"
+        notification.message = f"Seu certificado de participação no evento '{certificate.event.title}' foi gerado com sucesso."
+        notification.link = f"dashboard-participant/certificado/{certificate.id}"
+        notification.user_id = certificate.user_id
+
+        notification_service.save_notification(notification)

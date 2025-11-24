@@ -7,3 +7,5 @@ venv/
 .env
 app.db
 *.sqlite3
+*.pdf
+temp/

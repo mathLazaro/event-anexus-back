@@ -125,6 +125,9 @@ def update(event_id, event: Event, user_id: int) -> int:
     if not db_event:
         raise NotFoundException()
 
+    if db_event.date < datetime.now():
+        raise BadRequestException("Não é possível editar eventos que já ocorreram.")
+
     if db_event.created_by != user_id:
         raise UnauthorizedException("Você não tem permissão para editar este evento.")
 

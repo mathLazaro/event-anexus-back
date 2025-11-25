@@ -1,6 +1,7 @@
 from app import db, current_user
 from domain.models.event import Event
 from domain.models.event_type import EventType
+from domain.models.event_participant import event_participants
 from sqlalchemy import func, case
 from typing import List, Dict, Optional
 
@@ -188,9 +189,10 @@ def get_top_engagement_events_report(event_type: Optional[str] = None) -> List[D
         Event.title,
         Event.type,
         Event.capacity,
-        func.count(Event.participants).label('enrolled')
+        func.count(event_participants.c.user_id).label('enrolled')
     ).outerjoin(
-        Event.participants
+        event_participants,
+        Event.id == event_participants.c.event_id
     ).filter(
         Event.active == True,
         Event.created_by == current_user.id,

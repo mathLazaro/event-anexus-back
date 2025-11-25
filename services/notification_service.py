@@ -1,4 +1,4 @@
-from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from app import db, current_user
 from domain.models import Notification
 from utils import parse_integrity_error

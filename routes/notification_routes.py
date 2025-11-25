@@ -51,7 +51,7 @@ def mark_all_as_read():
     try:
         notification_service.mark_all_notifications_as_read()
         notifications = notification_service.get_user_notifications()
-        return response_resource([n.to_dict() for n in notifications]), 200
+        return response_resource([n.to_dict() for n in notifications])
     except Exception as e:
         print(f"Erro ao marcar todas as notificações como lidas: {e}")
         raise e
